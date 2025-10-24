@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的專屬夢想牆</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Noto Sans TC 作為中文字體，Inter 作為英文字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* 讓 canvas 在 Tailwind 的 w-full/h-full 容器中正確縮放 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 min-h-screen p-6 md:p-12">
+
+    <div class="container mx-auto max-w-4xl">
+        
+        <!-- 標題區 -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-amber-800 flex items-center justify-center gap-2">
+                我的專屬夢想牆 🌟
+            </h1>
+            <p class="text-lg text-amber-600 mt-2">準備好用你的畫筆和想法，讓它變得獨一無二了嗎？</p>
+            <h2 class="text-2xl font-bold text-gray-700 mt-6">
+                我的專屬夢想牆完成了！
+            </h2>
+        </header>
+
+        <!-- 主要內容區 -->
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- 1. 我的愛心磚牆 (感謝) -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                    ❤️ 我的愛心磚牆
+                </h3>
+                
+                <!-- 新增感謝 -->
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="brick-input" placeholder="輸入感謝的人名..." class="flex-grow border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <button id="add-brick-btn" class="bg-red-500 text-white rounded-lg py-2 px-4 font-semibold hover:bg-red-600 transition-colors">
+                        新增
+                    </button>
+                </div>
+
+                <!-- 磚牆顯示區 -->
+                <div id="brick-wall" class="min-h-[200px] border-2 border-dashed border-red-300 rounded-lg p-4 flex flex-wrap gap-2 items-start content-start">
+                    <!-- 範例磚塊 -->
+                    <div class="bg-red-500 text-white rounded-md py-1 px-3 text-sm font-medium shadow">
+                        感謝你
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 我的夢想發光板 (塗鴉) -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold text-blue-600 mb-4 flex items-center gap-2">
+                    🌟 我的夢想發光板
+                </h3>
+
+                <!-- 塗鴉工具 -->
+                <div class="flex justify-between items-center mb-2 gap-2">
+                    <div class="flex items-center gap-2">
+                        <label for="color-picker" class="text-sm font-medium">顏色:</label>
+                        <input type="color" id="color-picker" value="#000000" class="w-8 h-8 rounded border border-gray-300 cursor-pointer">
+                    </div>
+                    <button id="clear-canvas-btn" class="bg-gray-200 text-gray-700 rounded-lg py-1 px-3 text-sm font-semibold hover:bg-gray-300 transition-colors">
+                        清除畫布
+                    </button>
+                </div>
+                
+                <!-- 畫布容器 -->
+                <div class="h-[250px] border-2 border-dashed border-blue-300 rounded-lg p-0 overflow-hidden">
+                    <!-- 畫布 -->
+                    <canvas id="dream-canvas" class="bg-gray-50"></canvas>
+                </div>
+            </section>
+
+            <!-- 3. 給世界的溫暖的話 -->
+            <section class="bg-white p-6 rounded-lg shadow-md md:col-span-2">
+                <h3 class="text-xl font-bold text-yellow-600 mb-4 flex items-center gap-2">
+                    💬 給世界的溫暖的話
+                </h3>
+                <textarea id="warm-words" rows="4" placeholder="寫下你的夢想、祝福，或任何溫暖的話語..." class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"></textarea>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. 愛心磚牆邏輯 ---
+            const brickInput = document.getElementById('brick-input');
+            const addBrickBtn = document.getElementById('add-brick-btn');
+            const brickWall = document.getElementById('brick-wall');
+
+            addBrickBtn.addEventListener('click', addBrick);
+            brickInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addBrick();
+                }
+            });
+
+            function addBrick() {
+                const name = brickInput.value.trim();
+                if (name) {
+                    const brick = document.createElement('div');
+                    brick.className = 'bg-red-500 text-white rounded-md py-1 px-3 text-sm font-medium shadow animate-pulse-once'; // 加上簡單動畫
+                    brick.textContent = name;
+                    
+                    // 點擊磚塊可以移除
+                    brick.addEventListener('click', () => {
+                        brick.remove();
+                    });
+
+                    brickWall.appendChild(brick);
+                    brickInput.value = '';
+                }
+            }
+
+            // --- 2. 塗鴉板邏輯 ---
+            const canvas = document.getElementById('dream-canvas');
+            const ctx = canvas.getContext('2d');
+            const colorPicker = document.getElementById('color-picker');
+            const clearBtn = document.getElementById('clear-canvas-btn');
+            
+            let drawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            // 調整 canvas 尺寸以匹配其顯示尺寸
+            function resizeCanvas() {
+                const parent = canvas.parentElement;
+                canvas.width = parent.clientWidth;
+                canvas.height = parent.clientHeight;
+                ctx.strokeStyle = colorPicker.value;
+                ctx.lineWidth = 3; // 預設筆刷寬度
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+
+            // 初始調整大小
+            resizeCanvas();
+            // 監聽視窗大小變化
+            window.addEventListener('resize', resizeCanvas);
+
+
+            function startDrawing(e) {
+                drawing = true;
+                const [x, y] = getCoords(e);
+                [lastX, lastY] = [x, y];
+            }
+
+            function draw(e) {
+                if (!drawing) return;
+                e.preventDefault(); // 防止滾動
+                
+                const [x, y] = getCoords(e);
+                ctx.strokeStyle = colorPicker.value; // 每次繪製都更新顏色
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                [lastX, lastY] = [x, y];
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                ctx.beginPath(); // 結束當前路徑
+            }
+
+            // 獲取座標 (處理滑鼠和觸控)
+            function getCoords(e) {
+                if (e.touches && e.touches.length > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    return [e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top];
+                }
+                return [e.offsetX, e.offsetY];
+            }
+
+            // 綁定事件
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // 觸控事件
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+
+            // 清除按鈕
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        });
+    </script>
+</body>
+</html>
